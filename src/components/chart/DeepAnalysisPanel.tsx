@@ -20,11 +20,14 @@ interface Props {
   onConfigureKey?: () => void;
 }
 
+type CacheMap = Partial<Record<ReadingTopic, string>>;
+type ErrorMap = Partial<Record<ReadingTopic, string>>;
+
 export function DeepAnalysisPanel({ chart, onConfigureKey }: Props) {
   const [active, setActive] = useState<ReadingTopic>("personality");
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [texts, setTexts] = useState<CacheMap>({});
+  const [errors, setErrors] = useState<ErrorMap>({});
+  const [loadingTopic, setLoadingTopic] = useState<ReadingTopic | null>(null);
   const [hasKey, setHasKey] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const local = generateLocalReading(chart);
@@ -38,14 +41,15 @@ export function DeepAnalysisPanel({ chart, onConfigureKey }: Props) {
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  const run = async (topic: ReadingTopic) => {
+  const run = async (topic: ReadingTopic, force = false) => {
+    setActive(topic);
+    if (!force && texts[topic]) return; // cached — just switch
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
-    setActive(topic);
-    setText("");
-    setError(null);
-    setLoading(true);
+    setTexts((m) => ({ ...m, [topic]: "" }));
+    setErrors((m) => ({ ...m, [topic]: undefined }));
+    setLoadingTopic(topic);
     try {
       const saved = loadApiKey();
       const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -60,7 +64,9 @@ export function DeepAnalysisPanel({ chart, onConfigureKey }: Props) {
         signal: ctrl.signal,
       });
       if (!res.ok || !res.body) {
-        setError(await res.text().catch(() => "请求失败"));
+        const errText = await res.text().catch(() => "请求失败");
+        setErrors((m) => ({ ...m, [topic]: errText }));
+        setTexts((m) => ({ ...m, [topic]: undefined }));
         return;
       }
       const reader = res.body.getReader();
@@ -68,14 +74,22 @@ export function DeepAnalysisPanel({ chart, onConfigureKey }: Props) {
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        setText((t) => t + decoder.decode(value, { stream: true }));
+        const chunk = decoder.decode(value, { stream: true });
+        setTexts((m) => ({ ...m, [topic]: (m[topic] ?? "") + chunk }));
       }
     } catch (e) {
-      if ((e as Error).name !== "AbortError") setError(String(e));
+      if ((e as Error).name !== "AbortError") {
+        setErrors((m) => ({ ...m, [topic]: String(e) }));
+        setTexts((m) => ({ ...m, [topic]: undefined }));
+      }
     } finally {
-      setLoading(false);
+      setLoadingTopic((cur) => (cur === topic ? null : cur));
     }
   };
+
+  const text = texts[active] ?? "";
+  const error = errors[active];
+  const loading = loadingTopic === active;
 
   return (
     <PaperCard>
@@ -132,17 +146,28 @@ export function DeepAnalysisPanel({ chart, onConfigureKey }: Props) {
         )}
 
         {(text || loading) && (
-          <article className="font-serif text-base leading-[1.85] whitespace-pre-wrap">
-            {text || (
-              <span className="text-ink-600 inline-flex items-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-cinnabar animate-pulse" />
-                墨迹晕开中…
-              </span>
+          <>
+            <article className="font-serif text-base leading-[1.85] whitespace-pre-wrap">
+              {text || (
+                <span className="text-ink-600 inline-flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-cinnabar animate-pulse" />
+                  墨迹晕开中…
+                </span>
+              )}
+              {loading && text && (
+                <span className="inline-block w-2 h-4 ml-1 bg-cinnabar/60 animate-pulse align-middle" />
+              )}
+            </article>
+            {text && !loading && (
+              <button
+                type="button"
+                onClick={() => run(active, true)}
+                className="mt-3 text-xs text-ink-600 hover:text-cinnabar transition-colors"
+              >
+                ↻ 重新生成
+              </button>
             )}
-            {loading && text && (
-              <span className="inline-block w-2 h-4 ml-1 bg-cinnabar/60 animate-pulse align-middle" />
-            )}
-          </article>
+          </>
         )}
 
         {error && (
