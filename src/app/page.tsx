@@ -21,41 +21,50 @@ export default function HomePage() {
   const [view, setView] = useState<View>("hero");
   const [chart, setChart] = useState<BaziChart | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [computeError, setComputeError] = useState<string | null>(null);
   const wizard = useWizard();
 
   const submit = () => {
     const input = wizard.toBirthInput();
     if (!input) return;
-    const c = computeChart(input);
-    setChart(c);
-    setView("result");
-    saveHistory({
-      id: `${Date.now()}`,
-      label:
-        (input.name || "无名命主") +
-        ` · ${input.year}.${input.month}.${input.day}`,
-      chartJson: JSON.stringify(c),
-      savedAt: Date.now(),
-    });
+    setComputeError(null);
+    try {
+      const c = computeChart(input);
+      setChart(c);
+      setView("result");
+      saveHistory({
+        id: `${Date.now()}`,
+        label:
+          (input.name || "无名命主") +
+          ` · ${input.year}.${input.month}.${input.day}`,
+        chartJson: JSON.stringify(c),
+        savedAt: Date.now(),
+      });
+    } catch {
+      setComputeError("排盘失败，请检查输入信息后重试。");
+    }
   };
 
   const reset = () => {
     wizard.reset();
     setChart(null);
+    setComputeError(null);
     setView("hero");
   };
 
   const start = () => {
     wizard.reset();
+    setComputeError(null);
     setView("wizard");
   };
 
   const pickHistory = (e: HistoryEntry) => {
+    setComputeError(null);
     try {
       setChart(JSON.parse(e.chartJson) as BaziChart);
       setView("result");
     } catch {
-      // ignore corrupt entry
+      setComputeError("历史记录读取失败，该条目可能已损坏。");
     }
   };
 
@@ -73,6 +82,22 @@ export default function HomePage() {
           历史
         </button>
       </header>
+
+      {computeError && (
+        <div
+          role="alert"
+          className="flex items-center justify-between bg-cinnabar text-paper px-4 py-2 text-sm"
+        >
+          <span>{computeError}</span>
+          <button
+            onClick={() => setComputeError(null)}
+            aria-label="关闭提示"
+            className="ml-4 text-paper/80 hover:text-paper leading-none"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {view === "hero" && <Hero onStart={start} />}
       {view === "wizard" && (
