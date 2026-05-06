@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <rect width="180" height="180" rx="32" fill="#b14a3a"/>
+  <rect x="14" y="14" width="152" height="152" rx="20" fill="none" stroke="#c9a96a" stroke-width="2" opacity="0.55"/>
+  <text
+    x="50%" y="52%"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="'Noto Serif SC', 'Songti SC', 'STSong', serif"
+    font-size="78"
+    font-weight="700"
+    fill="#faf6ef"
+    letter-spacing="-2"
+  >四柱</text>
+</svg>
