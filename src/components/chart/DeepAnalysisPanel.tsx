@@ -5,6 +5,7 @@ import type { ReadingTopic } from "@/lib/qwen/prompts";
 import { PaperCard } from "@/components/common/PaperCard";
 import { OrnamentDivider } from "@/components/common/OrnamentDivider";
 import { generateLocalReading } from "@/lib/bazi/local-analysis";
+import { loadApiKey } from "@/lib/storage/api-key";
 import { cn } from "@/lib/cn";
 
 const TOPICS: { id: ReadingTopic; label: string }[] = [
@@ -14,13 +15,26 @@ const TOPICS: { id: ReadingTopic; label: string }[] = [
   { id: "health", label: "健康" },
 ];
 
-export function DeepAnalysisPanel({ chart }: { chart: BaziChart }) {
+interface Props {
+  chart: BaziChart;
+  onConfigureKey?: () => void;
+}
+
+export function DeepAnalysisPanel({ chart, onConfigureKey }: Props) {
   const [active, setActive] = useState<ReadingTopic>("personality");
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasKey, setHasKey] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const local = generateLocalReading(chart);
+
+  useEffect(() => {
+    setHasKey(!!loadApiKey());
+    const handler = () => setHasKey(!!loadApiKey());
+    window.addEventListener("bazi:apikey-changed", handler);
+    return () => window.removeEventListener("bazi:apikey-changed", handler);
+  }, []);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -33,9 +47,14 @@ export function DeepAnalysisPanel({ chart }: { chart: BaziChart }) {
     setError(null);
     setLoading(true);
     try {
+      const saved = loadApiKey();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (saved?.key) {
+        headers.Authorization = `Bearer ${saved.key}`;
+      }
       const res = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ chart, topic }),
         signal: ctrl.signal,
       });
@@ -64,25 +83,36 @@ export function DeepAnalysisPanel({ chart }: { chart: BaziChart }) {
         <span className="text-xs text-ink-600">由 Qwen 参照命理典籍生成</span>
       </header>
 
-      <div role="tablist" className="flex gap-1 mb-4 border-b border-gold/40">
-        {TOPICS.map((t) => (
+      <div className="flex items-end justify-between border-b border-gold/40 mb-4">
+        <div role="tablist" className="flex gap-1">
+          {TOPICS.map((t) => (
+            <button
+              key={t.id}
+              id={`tab-${t.id}`}
+              role="tab"
+              aria-selected={active === t.id}
+              aria-controls={`panel-${t.id}`}
+              onClick={() => run(t.id)}
+              className={cn(
+                "px-4 py-2 font-serif text-base min-h-[44px] transition-colors",
+                active === t.id
+                  ? "text-cinnabar border-b-2 border-cinnabar -mb-px"
+                  : "text-ink-600 hover:text-ink",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {!hasKey && onConfigureKey && (
           <button
-            key={t.id}
-            id={`tab-${t.id}`}
-            role="tab"
-            aria-selected={active === t.id}
-            aria-controls={`panel-${t.id}`}
-            onClick={() => run(t.id)}
-            className={cn(
-              "px-4 py-2 font-serif text-base min-h-[44px] transition-colors",
-              active === t.id
-                ? "text-cinnabar border-b-2 border-cinnabar -mb-px"
-                : "text-ink-600 hover:text-ink",
-            )}
+            type="button"
+            onClick={onConfigureKey}
+            className="text-xs text-cinnabar hover:underline pb-2 pr-1 shrink-0"
           >
-            {t.label}
+            未配置 AI Key，点击配置
           </button>
-        ))}
+        )}
       </div>
 
       <div
