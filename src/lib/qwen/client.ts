@@ -44,7 +44,7 @@ export async function* streamQwen(
   const reader = res.body.getReader();
   const queue: string[] = [];
   let done = false;
-  let flushResolve: (() => void) | null = null;
+  const flush = { resolve: null as (() => void) | null };
 
   const parser = createParser({
     onEvent(evt: EventSourceMessage) {
@@ -54,7 +54,7 @@ export async function* streamQwen(
         const delta = json.choices?.[0]?.delta?.content;
         if (typeof delta === "string" && delta.length > 0) {
           queue.push(delta);
-          flushResolve?.();
+          flush.resolve?.();
         }
       } catch {
         // ignore non-json keepalives
@@ -71,7 +71,7 @@ export async function* streamQwen(
       }
     } finally {
       done = true;
-      flushResolve?.();
+      flush.resolve?.();
     }
   })();
 
@@ -81,7 +81,7 @@ export async function* streamQwen(
       continue;
     }
     if (done) return;
-    await new Promise<void>((r) => { flushResolve = r; });
-    flushResolve = null;
+    await new Promise<void>((r) => { flush.resolve = r; });
+    flush.resolve = null;
   }
 }
