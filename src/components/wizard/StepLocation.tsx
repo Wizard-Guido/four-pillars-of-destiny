@@ -29,13 +29,16 @@ export function StepLocation() {
       <h2 className="font-serif text-2xl mb-2">出生方位</h2>
       <p className="text-ink-600 text-sm mb-6">用于真太阳时校正。可跳过，将以北京时间计算。</p>
 
-      <input
-        type="search"
-        value={query}
-        onChange={(e) => { setQuery(e.target.value); setPicked(null); }}
-        placeholder="搜索城市…"
-        className="w-full min-h-[44px] bg-transparent border-b border-gold py-2 px-1 font-serif text-lg focus:outline-none focus:border-cinnabar mb-3"
-      />
+      <label className="block mb-3">
+        <span className="sr-only">搜索城市</span>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setPicked(null); }}
+          placeholder="搜索城市…"
+          className="w-full min-h-[44px] bg-transparent border-b border-gold py-2 px-1 font-serif text-lg focus:outline-none focus:border-cinnabar"
+        />
+      </label>
 
       <ul className="space-y-1 mb-6 max-h-56 overflow-y-auto">
         {matches.map((c) => (

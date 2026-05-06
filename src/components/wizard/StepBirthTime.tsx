@@ -34,7 +34,7 @@ export function StepBirthTime() {
       <h2 className="font-serif text-2xl mb-2">出生时辰</h2>
       <p className="text-ink-600 text-sm mb-6">十二时辰，选其一即可。</p>
 
-      <div className="relative mx-auto w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] my-4">
+      <div className="relative mx-auto w-[280px] h-[280px] my-4">
         <div className="absolute inset-0 rounded-full border border-gold/60" />
         <div className="absolute inset-6 rounded-full border border-gold/30" />
         {SHICHEN.map((sc, i) => {

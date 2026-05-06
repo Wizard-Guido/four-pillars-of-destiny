@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { listHistory, removeHistory, clearHistory, type HistoryEntry } from "@/lib/storage/history";
 import { cn } from "@/lib/cn";
 import { InkButton } from "./InkButton";
@@ -14,7 +14,7 @@ export function HistorySidebar({ onPick, open, onClose }: Props) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
 
   useEffect(() => {
-    if (open) setEntries(listHistory());
+    if (open) startTransition(() => setEntries(listHistory()));
   }, [open]);
 
   const refresh = () => setEntries(listHistory());
@@ -39,7 +39,7 @@ export function HistorySidebar({ onPick, open, onClose }: Props) {
       >
         <header className="flex items-center justify-between px-5 py-4 border-b border-gold/40">
           <h3 className="font-serif text-xl">历史</h3>
-          <button onClick={onClose} aria-label="关闭" className="text-ink-600 px-2">×</button>
+          <button onClick={onClose} aria-label="关闭" className="text-ink-600 min-h-[44px] min-w-[44px] flex items-center justify-center">×</button>
         </header>
         <div className="overflow-y-auto h-[calc(100%-130px)]">
           {entries.length === 0 ? (
@@ -59,7 +59,8 @@ export function HistorySidebar({ onPick, open, onClose }: Props) {
                   </button>
                   <button
                     onClick={() => { removeHistory(e.id); refresh(); }}
-                    className="px-5 py-1 text-xs text-ink-600 hover:text-cinnabar"
+                    aria-label={`删除 ${e.label}`}
+                    className="px-5 min-h-[44px] text-xs text-ink-600 hover:text-cinnabar"
                   >
                     删除
                   </button>
