@@ -1,0 +1,16 @@
+:root {
+  --ink-900: #1c1d1f;
+  --ink-600: #5a5e63;
+  --paper: #faf6ef;
+  --paper-2: #f2ebde;
+  --cinnabar: #b14a3a;
+  --cinnabar-deep: #934034;
+  --celadon: #87a08c;
+  --gold: #c9a96a;
+  --gold-soft: #d8c39a;
+  --indigo: #3b4a5a;
+  --moon: #e8e2d4;
+
+  --shadow-paper: 0 1px 24px rgba(28, 29, 31, 0.06);
+  --transition-base: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
