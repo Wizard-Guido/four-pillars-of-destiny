@@ -68,8 +68,10 @@ export function DeepAnalysisPanel({ chart }: { chart: BaziChart }) {
         {TOPICS.map((t) => (
           <button
             key={t.id}
+            id={`tab-${t.id}`}
             role="tab"
             aria-selected={active === t.id}
+            aria-controls={`panel-${t.id}`}
             onClick={() => run(t.id)}
             className={cn(
               "px-4 py-2 font-serif text-base min-h-[44px] transition-colors",
@@ -83,35 +85,41 @@ export function DeepAnalysisPanel({ chart }: { chart: BaziChart }) {
         ))}
       </div>
 
-      {!text && !loading && !error && (
-        <div className="text-ink-600 text-sm space-y-3">
-          <p className="font-serif text-base text-ink">{local.summary}</p>
-          <ul className="list-disc pl-5 space-y-1">
-            {local.bullets.map((b, i) => <li key={i}>{b}</li>)}
-          </ul>
-          <p className="text-xs italic mt-4">点击上方任一类目，调用 AI 生成深度解读。</p>
-        </div>
-      )}
+      <div
+        role="tabpanel"
+        id={`panel-${active}`}
+        aria-labelledby={`tab-${active}`}
+      >
+        {!text && !loading && !error && (
+          <div className="text-ink-600 text-sm space-y-3">
+            <p className="font-serif text-base text-ink">{local.summary}</p>
+            <ul className="list-disc pl-5 space-y-1">
+              {local.bullets.map((b, i) => <li key={i}>{b}</li>)}
+            </ul>
+            <p className="text-xs italic mt-4">点击上方任一类目，调用 AI 生成深度解读。</p>
+          </div>
+        )}
 
-      {(text || loading) && (
-        <article className="font-serif text-base leading-[1.85] whitespace-pre-wrap">
-          {text || (
-            <span className="text-ink-600 inline-flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-cinnabar animate-pulse" />
-              墨迹晕开中…
-            </span>
-          )}
-          {loading && text && (
-            <span className="inline-block w-2 h-4 ml-1 bg-cinnabar/60 animate-pulse align-middle" />
-          )}
-        </article>
-      )}
+        {(text || loading) && (
+          <article className="font-serif text-base leading-[1.85] whitespace-pre-wrap">
+            {text || (
+              <span className="text-ink-600 inline-flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-cinnabar animate-pulse" />
+                墨迹晕开中…
+              </span>
+            )}
+            {loading && text && (
+              <span className="inline-block w-2 h-4 ml-1 bg-cinnabar/60 animate-pulse align-middle" />
+            )}
+          </article>
+        )}
 
-      {error && (
-        <div className="bg-cinnabar text-paper px-4 py-2 mt-4 text-sm rounded-sm">
-          解读出错：{error}
-        </div>
-      )}
+        {error && (
+          <div className="bg-cinnabar text-paper px-4 py-2 mt-4 text-sm rounded-sm">
+            解读出错：{error}
+          </div>
+        )}
+      </div>
 
       <OrnamentDivider />
       <p className="text-xs text-ink-600 italic">本解读仅供文化娱乐参考，不构成任何决策建议。</p>
