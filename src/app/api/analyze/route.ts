@@ -42,13 +42,16 @@ export async function POST(req: NextRequest) {
     return new Response("Missing chart or topic", { status: 400 });
   }
 
+  const authHeader = req.headers.get("authorization");
+  const userKey = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : undefined;
+
   const messages = buildAnalysisMessages(body.chart, body.topic);
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        for await (const chunk of streamQwen(messages, req.signal)) {
+        for await (const chunk of streamQwen(messages, { signal: req.signal, apiKey: userKey })) {
           controller.enqueue(encoder.encode(chunk));
         }
         controller.close();

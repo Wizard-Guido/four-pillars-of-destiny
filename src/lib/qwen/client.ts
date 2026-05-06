@@ -11,9 +11,9 @@ interface QwenMessage {
 
 export async function* streamQwen(
   messages: QwenMessage[],
-  signal?: AbortSignal,
+  options?: { signal?: AbortSignal; apiKey?: string },
 ): AsyncGenerator<string> {
-  const apiKey = process.env.DASHSCOPE_API_KEY;
+  const apiKey = options?.apiKey ?? process.env.DASHSCOPE_API_KEY;
   if (!apiKey) {
     yield "（管理员尚未配置 Qwen API Key，无法生成 AI 解读。请联系开发者在 .env.local 中填入 DASHSCOPE_API_KEY 后重启服务。）";
     return;
@@ -21,7 +21,7 @@ export async function* streamQwen(
 
   const res = await fetch(ENDPOINT, {
     method: "POST",
-    signal,
+    signal: options?.signal,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
