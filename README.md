@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 四柱 — 八字 Web App
 
-## Getting Started
+古风新中式的四柱八字排盘 Web 应用。本地完成排盘与基础解读，可选调用阿里云 Qwen（通义千问）生成深度命理分析。
 
-First, run the development server:
+## 功能
+
+- 5 步引导式输入（姓名性别、阳/农历日期、十二时辰、出生地、确认）
+- 即时本地排盘：四柱、十神、五行旺衰、大运十步
+- 可选 AI 深度解读：性格 / 事业 / 感情 / 健康
+- 历史记录（浏览器本地，最多 10 条）
+- 移动端友好
+
+## 本地运行
 
 ```bash
+npm install
+cp .env.local.example .env.local
+# 在 .env.local 中填入你的 DASHSCOPE_API_KEY（见下方）
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+打开 http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 申请 Qwen API Key
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. 访问阿里云百炼控制台：<https://bailian.console.aliyun.com/>
+2. 开通服务，进入「API-KEY 管理」创建 key
+3. 将 key 粘贴到 `.env.local` 的 `DASHSCOPE_API_KEY=` 后
+4. 重启 `npm run dev`
 
-## Learn More
+未配置 key 时，深度解读 tab 会显示友好提示，基础排盘不受影响。
 
-To learn more about Next.js, take a look at the following resources:
+## 部署到 Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Fork 本仓库，导入 Vercel
+2. 在 Project Settings → Environment Variables 添加 `DASHSCOPE_API_KEY`
+3. Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 技术栈
 
-## Deploy on Vercel
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · framer-motion · zustand · lunar-typescript · recharts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 测试
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm test
+```
+
+## 声明
+
+本应用为文化娱乐用途，不构成任何决策建议。
