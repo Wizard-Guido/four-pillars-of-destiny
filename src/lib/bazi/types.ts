@@ -40,7 +40,8 @@ export interface DayunStep {
   startAge: number;
   startYear: number;
   pillar: Pillar;
-  isCurrent: boolean;
+  /** @deprecated Computed at render time in DayunTimeline; not stored. */
+  isCurrent?: boolean;
 }
 
 export interface WuxingScore {
