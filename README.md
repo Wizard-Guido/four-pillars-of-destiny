@@ -21,14 +21,22 @@ npm run dev
 
 打开 http://localhost:3000
 
-## 申请 Qwen API Key
+## 申请并配置 Qwen API Key
 
-1. 访问阿里云百炼控制台：<https://bailian.console.aliyun.com/>
-2. 开通服务，进入「API-KEY 管理」创建 key
-3. 将 key 粘贴到 `.env.local` 的 `DASHSCOPE_API_KEY=` 后
-4. 重启 `npm run dev`
+应用支持两种配置方式：
 
-未配置 key 时，深度解读 tab 会显示友好提示，基础排盘不受影响。
+**方式一（推荐）：在应用内配置**
+
+1. 启动应用后，点击右上角齿轮图标
+2. 申请 Key：<https://bailian.console.aliyun.com/> → API-KEY 管理
+3. 粘贴 Key，点击「验证并保存」
+
+Key 仅保存在你的浏览器本地存储（可选「仅本次会话」模式）。
+
+**方式二：服务器环境变量**（多人共用部署时）
+
+在 `.env.local` 或部署平台环境变量设置 `DASHSCOPE_API_KEY=...`。
+此模式下所有用户共享同一 Key，无需在 UI 中配置。
 
 ## 部署到 Vercel
 
