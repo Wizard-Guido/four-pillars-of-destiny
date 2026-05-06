@@ -1,13 +1,8 @@
 import { NextRequest } from "next/server";
+import { endpointFor, parseRegionHeader } from "@/lib/qwen/endpoints";
 
 export const runtime = "nodejs";
 
-const ENDPOINT =
-  process.env.QWEN_ENDPOINT ??
-  "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
-
-// Use qwen-turbo for validation: cheapest, broadest model availability.
-// (qwen-max may not be enabled on all keys, which would cause false 401s.)
 const VALIDATION_MODEL = "qwen-turbo";
 
 interface QwenErrorBody {
@@ -37,8 +32,11 @@ export async function POST(req: NextRequest) {
     return new Response("Missing key", { status: 400 });
   }
 
+  const region = parseRegionHeader(req.headers.get("x-qwen-region"));
+  const endpoint = endpointFor(region);
+
   try {
-    const res = await fetch(ENDPOINT, {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -58,12 +56,19 @@ export async function POST(req: NextRequest) {
 
     const raw = await res.text().catch(() => "");
     const detail = extractQwenError(raw);
+    const regionLabel = region === "intl" ? "海外" : "国内";
 
     if (res.status === 401) {
-      return new Response(`Key 鉴权失败：${detail}`, { status: 401 });
+      return new Response(
+        `Key 鉴权失败（${regionLabel}站点）：${detail}`,
+        { status: 401 },
+      );
     }
     if (res.status === 403) {
-      return new Response(`Key 无访问权限：${detail}`, { status: 403 });
+      return new Response(
+        `Key 无访问权限（${regionLabel}站点）：${detail}`,
+        { status: 403 },
+      );
     }
     if (res.status === 429) {
       return new Response(`请求过于频繁，请稍后再试：${detail}`, { status: 429 });

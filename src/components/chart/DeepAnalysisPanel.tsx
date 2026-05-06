@@ -51,6 +51,7 @@ export function DeepAnalysisPanel({ chart, onConfigureKey }: Props) {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (saved?.key) {
         headers.Authorization = `Bearer ${saved.key}`;
+        headers["X-Qwen-Region"] = saved.region;
       }
       const res = await fetch("/api/analyze", {
         method: "POST",

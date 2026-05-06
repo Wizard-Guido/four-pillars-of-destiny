@@ -2,7 +2,13 @@
 import { useEffect, useState } from "react";
 import { InkButton } from "./InkButton";
 import { OrnamentDivider } from "./OrnamentDivider";
-import { loadApiKey, saveApiKey, clearApiKey, maskKey } from "@/lib/storage/api-key";
+import {
+  loadApiKey,
+  saveApiKey,
+  clearApiKey,
+  maskKey,
+  type QwenRegion,
+} from "@/lib/storage/api-key";
 import { cn } from "@/lib/cn";
 
 interface Props {
@@ -15,16 +21,19 @@ type Status = "idle" | "validating" | "ok" | "error";
 
 export function ApiKeyDialog({ open, onClose, onSaved }: Props) {
   const [key, setKey] = useState("");
+  const [region, setRegion] = useState<QwenRegion>("cn");
   const [remember, setRemember] = useState(true);
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState<string>("");
-  const [existing, setExisting] = useState<{ key: string; remember: boolean } | null>(null);
+  const [existing, setExisting] =
+    useState<{ key: string; region: QwenRegion; remember: boolean } | null>(null);
 
   useEffect(() => {
     if (open) {
       const e = loadApiKey();
       setExisting(e);
       setKey("");
+      setRegion(e?.region ?? "cn");
       setRemember(e?.remember ?? true);
       setStatus("idle");
       setMessage("");
@@ -49,11 +58,14 @@ export function ApiKeyDialog({ open, onClose, onSaved }: Props) {
     try {
       const res = await fetch("/api/validate-key", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Qwen-Region": region,
+        },
         body: JSON.stringify({ key: key.trim() }),
       });
       if (res.ok) {
-        saveApiKey(key.trim(), remember);
+        saveApiKey(key.trim(), region, remember);
         setStatus("ok");
         setMessage("校验通过，已保存。");
         setTimeout(() => {
@@ -94,14 +106,25 @@ export function ApiKeyDialog({ open, onClose, onSaved }: Props) {
         </h2>
         <p className="text-sm text-ink-600 mb-5">
           配置 Qwen（通义千问）API Key 以启用深度命理解读。
-          <a
-            href="https://bailian.console.aliyun.com/"
-            target="_blank"
-            rel="noreferrer"
-            className="text-cinnabar underline ml-1"
-          >
-            前往阿里云百炼申请
-          </a>
+          {region === "cn" ? (
+            <a
+              href="https://bailian.console.aliyun.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-cinnabar underline ml-1"
+            >
+              前往阿里云百炼申请
+            </a>
+          ) : (
+            <a
+              href="https://dashscope-intl.console.aliyun.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-cinnabar underline ml-1"
+            >
+              前往 DashScope International 申请
+            </a>
+          )}
         </p>
 
         {existing && (
@@ -109,7 +132,8 @@ export function ApiKeyDialog({ open, onClose, onSaved }: Props) {
             <div className="text-xs text-ink-600 mb-1">当前已保存</div>
             <div className="font-mono text-sm">{maskKey(existing.key)}</div>
             <div className="text-xs text-ink-600 mt-1">
-              存储位置：{existing.remember ? "本地永久（localStorage）" : "仅本次会话（sessionStorage）"}
+              区域：{existing.region === "intl" ? "海外站点" : "国内站点"}
+              ｜存储：{existing.remember ? "本地永久" : "仅本次会话"}
             </div>
             <button
               type="button"
@@ -120,6 +144,29 @@ export function ApiKeyDialog({ open, onClose, onSaved }: Props) {
             </button>
           </div>
         )}
+
+        <fieldset className="mb-4">
+          <legend className="text-sm text-ink-600 mb-2">区域</legend>
+          <div className="inline-flex border border-gold/60 rounded-sm overflow-hidden">
+            {([
+              { v: "cn" as const, label: "国内（百炼）" },
+              { v: "intl" as const, label: "海外（International）" },
+            ]).map((r) => (
+              <button
+                key={r.v}
+                type="button"
+                onClick={() => setRegion(r.v)}
+                className={cn(
+                  "px-3 py-2 text-sm font-serif transition-colors min-h-[44px]",
+                  region === r.v ? "bg-cinnabar text-paper" : "text-ink hover:bg-paper-2",
+                )}
+                aria-pressed={region === r.v}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
 
         <label className="block mb-3">
           <span className="block text-sm text-ink-600 mb-1">

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { streamQwen } from "@/lib/qwen/client";
 import { buildAnalysisMessages, type ReadingTopic } from "@/lib/qwen/prompts";
+import { parseRegionHeader } from "@/lib/qwen/endpoints";
 import type { BaziChart } from "@/lib/bazi/types";
 
 export const runtime = "nodejs";
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
 
   const authHeader = req.headers.get("authorization");
   const userKey = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : undefined;
+  const region = parseRegionHeader(req.headers.get("x-qwen-region"));
 
   const messages = buildAnalysisMessages(body.chart, body.topic);
   const encoder = new TextEncoder();
@@ -51,7 +53,7 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        for await (const chunk of streamQwen(messages, { signal: req.signal, apiKey: userKey })) {
+        for await (const chunk of streamQwen(messages, { signal: req.signal, apiKey: userKey, region })) {
           controller.enqueue(encoder.encode(chunk));
         }
         controller.close();

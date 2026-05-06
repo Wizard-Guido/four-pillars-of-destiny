@@ -1,8 +1,5 @@
 import { createParser, type EventSourceMessage } from "eventsource-parser";
-
-const ENDPOINT =
-  process.env.QWEN_ENDPOINT ??
-  "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+import { endpointFor, type QwenRegion } from "./endpoints";
 
 interface QwenMessage {
   role: "system" | "user" | "assistant";
@@ -11,7 +8,7 @@ interface QwenMessage {
 
 export async function* streamQwen(
   messages: QwenMessage[],
-  options?: { signal?: AbortSignal; apiKey?: string },
+  options?: { signal?: AbortSignal; apiKey?: string; region?: QwenRegion },
 ): AsyncGenerator<string> {
   const apiKey = options?.apiKey ?? process.env.DASHSCOPE_API_KEY;
   if (!apiKey) {
@@ -19,7 +16,9 @@ export async function* streamQwen(
     return;
   }
 
-  const res = await fetch(ENDPOINT, {
+  const endpoint = endpointFor(options?.region);
+
+  const res = await fetch(endpoint, {
     method: "POST",
     signal: options?.signal,
     headers: {
