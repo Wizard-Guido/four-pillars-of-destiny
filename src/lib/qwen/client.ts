@@ -15,7 +15,7 @@ export async function* streamQwen(
 ): AsyncGenerator<string> {
   const apiKey = options?.apiKey ?? process.env.DASHSCOPE_API_KEY;
   if (!apiKey) {
-    yield "（管理员尚未配置 Qwen API Key，无法生成 AI 解读。请联系开发者在 .env.local 中填入 DASHSCOPE_API_KEY 后重启服务。）";
+    yield "（尚未配置 Qwen API Key。请点击右上角齿轮图标 ⚙ 配置后再试。）";
     return;
   }
 
