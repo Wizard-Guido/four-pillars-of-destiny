@@ -102,10 +102,18 @@ export function computeChart(input: BirthInput): BaziChart {
     input.longitude,
   );
 
+  // For lunar calendar, a leap month is encoded as a negative month number in
+  // lunar-typescript (e.g. leap 4th month = -4). Pass the negative value when
+  // isLeapMonth is true so the library selects the correct intercalary month.
+  const lunarMonth =
+    input.calendar === "lunar" && input.isLeapMonth
+      ? -corrected.month
+      : corrected.month;
+
   const solar =
     input.calendar === "solar"
       ? Solar.fromYmdHms(corrected.year, corrected.month, corrected.day, corrected.hour, corrected.minute, 0)
-      : Lunar.fromYmdHms(corrected.year, corrected.month, corrected.day, corrected.hour, corrected.minute, 0).getSolar();
+      : Lunar.fromYmdHms(corrected.year, lunarMonth, corrected.day, corrected.hour, corrected.minute, 0).getSolar();
 
   const lunar = solar.getLunar();
   const ec = lunar.getEightChar();
@@ -130,8 +138,9 @@ export function computeChart(input: BirthInput): BaziChart {
   const yun = ec.getYun(input.gender === "男" ? 1 : 0);
   // Request 11 entries: index 0 has empty GZ (pre-yun period), indices 1–10 are the 10 actual steps.
   const dayunArr = yun.getDaYun(11);
-  const currentSolarYear = new Date().getFullYear();
   // Skip index 0 (pre-yun "起运前" period with empty GanZhi).
+  // isCurrent is intentionally omitted here — DayunTimeline derives it at
+  // render time from startYear so it stays accurate after localStorage round-trips.
   const dayun: DayunStep[] = dayunArr.slice(1, 11).map((d, i) => {
     const stepPillar = buildPillar(d.getGanZhi(), dayMaster);
     const startYear = d.getStartYear();
@@ -140,9 +149,6 @@ export function computeChart(input: BirthInput): BaziChart {
       startAge: d.getStartAge(),
       startYear,
       pillar: stepPillar,
-      isCurrent:
-        currentSolarYear >= startYear &&
-        currentSolarYear < startYear + 10,
     };
   });
 
