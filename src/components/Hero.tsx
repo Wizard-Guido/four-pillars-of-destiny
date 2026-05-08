@@ -25,7 +25,7 @@ export function Hero({ onStart }: { onStart: () => void }) {
         transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
         className="font-serif text-6xl sm:text-7xl tracking-[0.2em] mb-3"
       >
-        四 柱
+        八 字
       </motion.h1>
       <motion.p
         initial={{ opacity: 0 }}

@@ -21,7 +21,7 @@ export function FourPillarsCard({ chart }: { chart: BaziChart }) {
   return (
     <PaperCard>
       <header className="flex items-baseline justify-between mb-6">
-        <h2 className="font-serif text-2xl">四柱</h2>
+        <h2 className="font-serif text-2xl">八字</h2>
         <span className="text-sm text-ink-600">
           {chart.zodiac}年生 · 日主{chart.dayMaster.stem}{chart.dayMaster.element}
         </span>

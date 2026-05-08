@@ -75,7 +75,7 @@ export default function HomePage() {
       <header className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-gold/30">
         <button onClick={reset} aria-label="返回首页" className="flex items-center gap-2">
           <SealLogo size={28} />
-          <span className="font-serif text-lg">四柱</span>
+          <span className="font-serif text-lg">八字</span>
         </button>
         <div className="flex items-center gap-1">
           <button

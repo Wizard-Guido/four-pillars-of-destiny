@@ -17,8 +17,8 @@ const notoSans = Noto_Sans_SC({
 });
 
 export const metadata: Metadata = {
-  title: "四柱 — 知命，知未来",
-  description: "古风四柱八字排盘与命理解读",
+  title: "八字 — 知命，知未来",
+  description: "古风八字排盘与命理解读",
 };
 
 export const viewport: Viewport = {
