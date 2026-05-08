@@ -2,6 +2,10 @@
 
 古风新中式的八字排盘 Web 应用。本地完成排盘与基础解读，可选调用阿里云 Qwen（通义千问）生成深度命理分析。
 
+## 在线访问
+
+<https://four-pillars-of-destiny-ten.vercel.app?_vercel_share=vtdRhkq3NXUTAGxaNDEYujbUe00tm0Ew>
+
 ## 功能
 
 - 5 步引导式输入（姓名性别、阳/农历日期、十二时辰、出生地、确认）
