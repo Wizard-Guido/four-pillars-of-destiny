@@ -4,7 +4,7 @@
 
 ## 在线访问
 
-<https://four-pillars-of-destiny-ten.vercel.app?_vercel_share=vtdRhkq3NXUTAGxaNDEYujbUe00tm0Ew>
+<https://four-pillars-of-destiny-nphhko0q4-wizardguidos-projects.vercel.app/>
 
 ## 功能
 
